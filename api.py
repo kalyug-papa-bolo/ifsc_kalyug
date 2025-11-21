@@ -8,10 +8,10 @@ RAZORPAY_IFSC_BASE_URL = "https://ifsc.razorpay.com"
 
 @app.route("/", methods=["GET"])
 def home():
-    # Simple info route
     return jsonify({
         "message": "IFSC Bank Info API by @Kalyug_present",
-        "usage": "/ifsc?code=HDFC0000314"
+        "usage": "/ifsc?code=HDFC0000314",
+        "credit": "@Kalyug_present"
     })
 
 
@@ -27,7 +27,6 @@ def ifsc_lookup():
                 "error": "IFSC code (code) parameter is required."
             }), 400
 
-        # Basic validation (11 chars, 5th char 0)
         if len(ifsc) != 11:
             return jsonify({
                 "success": False,
@@ -35,8 +34,8 @@ def ifsc_lookup():
                 "error": "Invalid IFSC format. It must be 11 characters."
             }), 400
 
-        # Call Razorpay IFSC API
         url = f"{RAZORPAY_IFSC_BASE_URL}/{ifsc}"
+
         try:
             r = requests.get(url, timeout=10)
         except requests.exceptions.RequestException as e:
@@ -47,7 +46,6 @@ def ifsc_lookup():
             }), 502
 
         if r.status_code != 200:
-            # Razorpay 404 etc.
             return jsonify({
                 "success": False,
                 "credit": "@Kalyug_present",
@@ -56,7 +54,6 @@ def ifsc_lookup():
 
         data = r.json()
 
-        # Ensure all expected keys exist (fill with None if missing)
         keys = [
             "BRANCH", "ADDRESS", "STATE", "MICR", "CONTACT",
             "UPI", "RTGS", "CITY", "CENTRE", "DISTRICT",
@@ -79,6 +76,5 @@ def ifsc_lookup():
         }), 500
 
 
-# Local testing only – Vercel itsko ignore kar dega
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
